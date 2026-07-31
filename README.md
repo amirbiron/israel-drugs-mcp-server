@@ -112,6 +112,46 @@ Add to your Claude Desktop settings (`~/.claude.json` or `%APPDATA%\Claude\claud
 }
 ```
 
+### **Claude Code Configuration**
+
+The repository ships a project-scoped [`.mcp.json`](.mcp.json), so any Claude Code
+session opened in this directory picks up two servers automatically:
+
+| Server | Command | Provides |
+| --- | --- | --- |
+| `israel-drugs` | `node dist/index.js` | This repository's Ministry of Health drug tools |
+| `israel-medical-research` | `npx -y @skills-il/israel-medical-research-mcp` | PubMed / NCBI medical literature search |
+
+`dist/` is gitignored, so a fresh clone has nothing to run. The `SessionStart` hook
+in [`.claude/settings.json`](.claude/settings.json) calls
+[`scripts/build-mcp-server.sh`](scripts/build-mcp-server.sh), which installs
+dependencies and builds when `dist/index.js` is missing or older than `src/`.
+
+#### **Claude Code on the web (cloud sessions)**
+
+Cloud sessions load the repo's `.mcp.json`, but two environment settings matter:
+
+1. **Network access.** Neither server's upstream host is on the default *Trusted*
+   allowlist. Set the environment's network access to **Custom**, keep *"Also
+   include default list of common package managers"* checked (npm is needed for
+   `npx`), and add:
+
+   ```text
+   israeldrugs.health.gov.il
+   mohpublic.z6.web.core.windows.net
+   eutils.ncbi.nlm.nih.gov
+   pubmed.ncbi.nlm.nih.gov
+   www.ncbi.nlm.nih.gov
+   ```
+
+   Without these, both servers start and every API call fails.
+
+2. **Build timing.** `SessionStart` hooks run *after* Claude Code launches, so on
+   the very first connection of a fresh session `dist/index.js` may not exist yet
+   and `israel-drugs` can fail to connect. To build before Claude Code starts,
+   put `npm ci && npm run build` in the environment's **Setup script** instead.
+   `israel-medical-research` is unaffected — `npx` fetches it on demand.
+
 ---
 
 ## 🚀 Quick Start

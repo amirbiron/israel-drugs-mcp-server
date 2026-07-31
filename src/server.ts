@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
 
 // Import all our tool and prompt registrations
 import { registerDrugComparisonPrompt } from "./prompts/drugComparison.js";
@@ -87,7 +88,10 @@ export function setupHttpServer(port: number = 3000) {
             };
 
             const server = createServer();
-            await server.connect(transport);
+            // The SDK declares StreamableHTTPServerTransport's optional handlers as
+            // `| undefined`, which `exactOptionalPropertyTypes` rejects against the
+            // Transport interface. The shapes are compatible at runtime.
+            await server.connect(transport as Transport);
         } else {
             res.status(400).json({
                 jsonrpc: '2.0',

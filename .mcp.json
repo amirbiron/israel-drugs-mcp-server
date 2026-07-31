@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "israel-drugs": {
+      "command": "node",
+      "args": ["dist/index.js"]
+    },
+    "israel-medical-research": {
+      "command": "npx",
+      "args": ["-y", "@skills-il/israel-medical-research-mcp"]
+    }
+  }
+}
