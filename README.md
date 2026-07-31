@@ -119,13 +119,24 @@ session opened in this directory picks up two servers automatically:
 
 | Server | Command | Provides |
 | --- | --- | --- |
-| `israel-drugs` | `node dist/index.js` | This repository's Ministry of Health drug tools |
-| `israel-medical-research` | `npx -y @skills-il/israel-medical-research-mcp` | PubMed / NCBI medical literature search |
+| `israel-drugs` | `bash scripts/start-mcp-server.sh` | This repository's Ministry of Health drug tools |
+| `israel-medical-research` | `npx -y @skills-il/israel-medical-research-mcp@1.0.1` | PubMed / NCBI medical literature search |
 
-`dist/` is gitignored, so a fresh clone has nothing to run. The `SessionStart` hook
-in [`.claude/settings.json`](.claude/settings.json) calls
-[`scripts/build-mcp-server.sh`](scripts/build-mcp-server.sh), which installs
-dependencies and builds when `dist/index.js` is missing or older than `src/`.
+`dist/` is gitignored, so a fresh clone has nothing to run.
+[`scripts/start-mcp-server.sh`](scripts/start-mcp-server.sh) installs dependencies
+and builds before handing off to `node dist/index.js`. Because the build runs
+inside the server command, the client waits for it and the first connection can
+never race an unfinished build.
+
+Both steps are skipped when nothing changed, so a warm launch costs about 300ms.
+Each step writes a stamp file holding a content hash of its inputs — `package.json`
+for the install, plus `tsconfig.json` and every `src/**/*.ts` for the build — and
+writes it only on success. Editing, adding, or deleting a source file changes the
+hash and triggers a rebuild; an interrupted install or build leaves no stamp and is
+retried on the next launch.
+
+The version of `israel-medical-research` is pinned so a registry publish can't
+change what a session loads. Bump it deliberately after testing the new version.
 
 #### **Claude Code on the web (cloud sessions)**
 
@@ -146,11 +157,14 @@ Cloud sessions load the repo's `.mcp.json`, but two environment settings matter:
 
    Without these, both servers start and every API call fails.
 
-2. **Build timing.** `SessionStart` hooks run *after* Claude Code launches, so on
-   the very first connection of a fresh session `dist/index.js` may not exist yet
-   and `israel-drugs` can fail to connect. To build before Claude Code starts,
-   put `npm ci && npm run build` in the environment's **Setup script** instead.
-   `israel-medical-research` is unaffected — `npx` fetches it on demand.
+2. **First-launch build time.** In a fresh cloud session the first `israel-drugs`
+   launch installs dependencies and compiles before it speaks, which takes roughly
+   20 seconds against Claude Code's 30-second MCP startup timeout. That is enough
+   on a normal connection but leaves little margin. Two ways to remove the risk:
+   put `npm ci && npm run build` in the environment's **Setup script** so the work
+   is already done and cached, or raise the timeout with `MCP_TIMEOUT=60000` in the
+   environment variables. `israel-medical-research` is unaffected — `npx` fetches
+   it on demand.
 
 ---
 
