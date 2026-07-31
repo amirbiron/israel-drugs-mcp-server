@@ -22,8 +22,15 @@ BUILD_STAMP="dist/.israel-drugs-build"
 # source file changes the hash just as an edited one does.
 read_stamp() { cat "$1" 2>/dev/null; }
 
+# A matching stamp only proves the last install succeeded, not that the tree is
+# still intact, so the resolved tree is validated too: `npm ls` exits non-zero
+# when any package the runtime needs is missing, at any depth. Without it,
+# deleting a single package from node_modules would leave both the directory and
+# the stamp in place and the server would fail at require() time instead.
 deps_want="$(sha256sum package.json | cut -d' ' -f1)"
-if [ ! -d node_modules ] || [ "$deps_want" != "$(read_stamp "$DEPS_STAMP")" ]; then
+if [ ! -d node_modules ] ||
+  [ "$deps_want" != "$(read_stamp "$DEPS_STAMP")" ] ||
+  ! npm ls --all --omit=dev >/dev/null 2>&1; then
   npm install --no-audit --no-fund >&2 || exit 1
   printf '%s\n' "$deps_want" >"$DEPS_STAMP"
 fi
@@ -35,6 +42,9 @@ build_want="$(
   } 2>/dev/null | sha256sum | cut -d' ' -f1
 )"
 if [ ! -f dist/index.js ] || [ "$build_want" != "$(read_stamp "$BUILD_STAMP")" ]; then
+  # The check above covers runtime dependencies; compiling also needs the dev
+  # ones, which a production-only install leaves out.
+  [ -d node_modules/typescript ] || npm install --no-audit --no-fund >&2 || exit 1
   npm run build >&2 || exit 1
   printf '%s\n' "$build_want" >"$BUILD_STAMP"
 fi

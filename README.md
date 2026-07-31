@@ -128,12 +128,16 @@ and builds before handing off to `node dist/index.js`. Because the build runs
 inside the server command, the client waits for it and the first connection can
 never race an unfinished build.
 
-Both steps are skipped when nothing changed, so a warm launch costs about 300ms.
+Both steps are skipped when nothing changed, so a warm launch costs about 600ms.
 Each step writes a stamp file holding a content hash of its inputs — `package.json`
 for the install, plus `tsconfig.json` and every `src/**/*.ts` for the build — and
 writes it only on success. Editing, adding, or deleting a source file changes the
 hash and triggers a rebuild; an interrupted install or build leaves no stamp and is
 retried on the next launch.
+
+A stamp only proves the last install succeeded, so `npm ls` validates the resolved
+tree on every launch as well. Anything removed from `node_modules` afterwards, at
+any depth, reinstalls instead of failing at `require()` time.
 
 The version of `israel-medical-research` is pinned so a registry publish can't
 change what a session loads. Bump it deliberately after testing the new version.
