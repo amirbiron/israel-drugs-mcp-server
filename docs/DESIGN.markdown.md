@@ -2,7 +2,7 @@
 name: Coast Markdown
 version: 0.1.0
 extends: Coast 0.1.2
-description: Markdown authoring and rendering layer for Coast. Prose scale, code chrome, 14 callout tones, task lists, collapsibles, Mermaid theming, and the editor states a save-capable document system needs.
+description: Markdown authoring and rendering layer for Coast. Prose scale, code chrome, 14 container types across seven callout tones, task lists, collapsibles, Mermaid theming, and the save-state and focus tokens a document editor needs.
 colors:
   tone-info: "#1E5F8C"
   tone-info-bg: "#E8F0F6"
@@ -216,14 +216,14 @@ system.
 
 ```css
 .prose a {
-  color: var(--tone-info);
+  color: var(--primary);
   text-decoration-line: underline;
   text-decoration-thickness: 1px;
   text-underline-offset: 0.25em;
   text-decoration-skip-ink: auto;
   transition: color 120ms ease;
 }
-.prose a:hover { color: var(--colors-tertiary); }
+.prose a:hover { color: var(--tertiary); }
 ```
 
 `text-underline-offset: 0.25em` is a Hebrew requirement, not a preference. The
@@ -276,34 +276,40 @@ shadow, no gradient, full measure width.
 
 Fourteen container types, `::: type` through `:::`.
 
-Fourteen distinct colors would destroy the palette. Coast is a four-color system
-and it stays one. The types map onto **seven tones**, and types sharing a tone are
-distinguished by icon and label, not by hue.
+Thirteen of them are callouts. Fourteen distinct colors would destroy the
+palette, and Coast is a four-color system that stays one, so those thirteen map
+onto **seven tones**. Types sharing a tone are distinguished by icon and label,
+not by hue. The fourteenth, `quote`, is not a callout at all and takes no tone.
 
 | Type | Tone | Hebrew label |
 | --- | --- | --- |
-| `note` | info | הערה |
-| `info` | info | מידע |
-| `abstract` | info | תקציר |
-| `tip` | tip | טיפ |
-| `example` | tip | דוגמה |
-| `success` | success | הצלחה |
-| `warning` | warning | אזהרה |
-| `experimental` | warning | ניסיוני |
-| `danger` | danger | סכנה |
-| `important` | accent | חשוב |
-| `question` | accent | שאלה |
-| `todo` | muted | לביצוע |
-| `deprecated` | muted | מיושן |
-| `quote` | editorial | ציטוט |
+| `note` | `info` | הערה |
+| `info` | `info` | מידע |
+| `abstract` | `info` | תקציר |
+| `tip` | `tip` | טיפ |
+| `example` | `tip` | דוגמה |
+| `success` | `success` | הצלחה |
+| `warning` | `warning` | אזהרה |
+| `experimental` | `warning` | ניסיוני |
+| `danger` | `danger` | סכנה |
+| `important` | `accent` | חשוב |
+| `question` | `accent` | שאלה |
+| `todo` | `muted` | לביצוע |
+| `deprecated` | `muted` | מיושן |
+| `quote` | none, see below | ציטוט |
 
-This is deliberate. `note` and `info` differing only by label is correct: they
-carry the same weight and the reader should not be asked to decode two blues.
-Reserve the loud tones. If everything is `danger`, nothing is.
+Every value in the Tone column resolves to a real token triplet
+(`tone-<name>`, `tone-<name>-bg`, `tone-<name>-ink`). There is no
+`tone-editorial`, and there should not be: a renderer that looks up a tone for
+`quote` is following the wrong branch.
+
+The mapping is deliberate. `note` and `info` differing only by label is correct:
+they carry the same weight and the reader should not be asked to decode two
+blues. Reserve the loud tones. If everything is `danger`, nothing is.
 
 ### Anatomy
 
-```
+```text
 ┌ accent bar, 3px, inline-start edge
 │  [icon] LABEL                 ← title row, title-sm, tone ink
 │  body content                 ← body-md, on-surface
@@ -317,10 +323,10 @@ detached.
 
 ### Tone treatment
 
-Each tone supplies three values: `tone-X` for the accent bar and icon,
-`tone-X-bg` for the block background, `tone-X-ink` for the label text. Body text
-inside a callout stays `on-surface`, never the tone ink. Tinting body copy costs
-contrast and gains nothing.
+Each of the seven tones supplies three values: `tone-X` for the accent bar and
+icon, `tone-X-bg` for the block background, `tone-X-ink` for the label text. Body
+text inside a callout stays `on-surface`, never the tone ink. Tinting body copy
+costs contrast and gains nothing.
 
 Both light and dark values are defined in the frontmatter. The dark backgrounds
 are near-black tints of the hue rather than lightened surfaces, so a callout
@@ -328,7 +334,8 @@ inside a dark reading view does not glow.
 
 ### `quote` is not a callout
 
-`::: quote` renders in Frank Ruhl Libre at `headline-sm`, no tint, no icon, a
+It takes no tone triplet, and none is defined for it. `::: quote` renders in
+Frank Ruhl Libre at `headline-sm`, no tint, no icon, a
 hairline `prose-rule` bar on the inline-start edge, generous `spacing.lg` block
 margins. It is the one container that gets Coast's editorial voice, and it is
 where the system's serif earns its place inside a document.
@@ -453,11 +460,23 @@ mermaid.initialize({
 });
 ```
 
-Dark mode swaps to `background: #0A1828`, `mainBkg: #142A40`, `textColor:
-#F9F4E8`, `lineColor: #76B5D9`, `primaryColor: #12283C`, `primaryBorderColor:
-#76B5D9`, `clusterBkg: #101F30`, `clusterBorder: #1E3550`. Re-render on theme
-change; Mermaid bakes colors into the SVG at render time and does not react to a
-CSS variable flip.
+Dark mode swaps these values:
+
+```js
+{
+  background:         '#0A1828',
+  mainBkg:            '#142A40',
+  textColor:          '#F9F4E8',
+  lineColor:          '#76B5D9',
+  primaryColor:       '#12283C',
+  primaryBorderColor: '#76B5D9',
+  clusterBkg:         '#101F30',
+  clusterBorder:      '#1E3550',
+}
+```
+
+Re-render on theme change. Mermaid bakes colors into the SVG at render time and
+does not react to a CSS variable flip.
 
 ### Mermaid in RTL
 
