@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Coast Markdown — משטח בדיקה</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Frank+Ruhl+Libre:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Coast 0.1.2 base tokens
+   ============================================================ */
+:root {
+  --primary: #1E5F8C;
+  --surface: #F9F4E8;
+  --tertiary: #5BA8B8;
+  --secondary: #D4906B;
+  --on-primary: #F9F4E8;
+  --on-surface: #2A3540;
+  --on-tertiary: #FFFFFF;
+  --on-secondary: #FFFFFF;
+  --surface-container: #FFFFFF;
+
+  /* Coast Markdown 0.1.0 — tones */
+  --tone-info: #1E5F8C;      --tone-info-bg: #E8F0F6;      --tone-info-ink: #16496B;
+  --tone-tip: #4A97A8;       --tone-tip-bg: #E4F2F4;       --tone-tip-ink: #266B78;
+  --tone-success: #3E8E6E;   --tone-success-bg: #E5F2ED;   --tone-success-ink: #2F7358;
+  --tone-warning: #C88A2E;   --tone-warning-bg: #FAF0DC;   --tone-warning-ink: #8F621C;
+  --tone-danger: #C1503E;    --tone-danger-bg: #FAE8E5;    --tone-danger-ink: #9A3D2D;
+  --tone-accent: #7A5C9E;    --tone-accent-bg: #F0EAF6;    --tone-accent-ink: #5F4680;
+  --tone-muted: #6B7785;     --tone-muted-bg: #F0EFEA;     --tone-muted-ink: #4E5865;
+
+  --status-saved: #3E8E6E;
+  --status-saving: #6B7785;
+  --status-dirty: #C88A2E;
+  --status-error: #C1503E;
+
+  --prose-rule: #E3DCC9;
+  --prose-code-bg: #F1EDE1;
+  --prose-mark-bg: #F5DFC8;
+  --prose-selection: #CFE2EE;
+  --focus-ring: #5BA8B8;
+
+  /* mermaid theme, light */
+  --mm-bg: #F9F4E8; --mm-node: #FFFFFF; --mm-node-fill: #E8F0F6;
+  --mm-border: #1E5F8C; --mm-line: #1E5F8C; --mm-text: #2A3540;
+  --mm-cluster-bg: #F1EDE1; --mm-cluster-border: #E3DCC9;
+
+  /* scales */
+  --sp-xs: 6px;  --sp-sm: 12px; --sp-md: 20px; --sp-lg: 32px; --sp-xl: 52px; --sp-2xl: 88px;
+  --ck-xs: 4px;  --ck-sm: 8px;  --ck-md: 12px; --ck-lg: 16px; --ck-xl: 24px;
+  --rounded-xs: 4px; --rounded-sm: 8px; --rounded-md: 16px; --rounded-lg: 24px;
+
+  --font-body: Heebo, "Segoe UI", Arial, sans-serif;
+  --font-display: "Frank Ruhl Libre", "David Libre", Georgia, serif;
+  --font-mono: "JetBrains Mono", "IBM Plex Mono", ui-monospace, "Miriam Mono CLM", monospace;
+
+  --elevation-card: 0 16px 40px rgba(30,95,140,0.12);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { color-scheme: dark; } }
+
+:root[data-theme="dark"], :root.dark-vars {
+  --primary: #76B5D9;
+  --surface: #0A1828;
+  --tertiary: #7DC4CE;
+  --secondary: #E8B795;
+  --on-primary: #0A1828;
+  --on-surface: #F9F4E8;
+  --on-tertiary: #0A1828;
+  --on-secondary: #0A1828;
+  --surface-container: #142A40;
+
+  --tone-info: #76B5D9;      --tone-info-bg: #12283C;      --tone-info-ink: #A8D2EA;
+  --tone-tip: #7DC4CE;       --tone-tip-bg: #122C33;       --tone-tip-ink: #A9DCE3;
+  --tone-success: #66B894;   --tone-success-bg: #122E26;   --tone-success-ink: #9AD6BA;
+  --tone-warning: #E0AE5E;   --tone-warning-bg: #2E2415;   --tone-warning-ink: #EFCE96;
+  --tone-danger: #E08574;    --tone-danger-bg: #311915;    --tone-danger-ink: #F0B3A6;
+  --tone-accent: #A98FC9;    --tone-accent-bg: #231C33;    --tone-accent-ink: #C9B6E0;
+  --tone-muted: #8B97A5;     --tone-muted-bg: #16202C;     --tone-muted-ink: #B4BEC9;
+
+  --status-saved: #66B894;
+  --status-saving: #8B97A5;
+  --status-dirty: #E0AE5E;
+  --status-error: #E08574;
+
+  --prose-rule: #1E3550;
+  --prose-code-bg: #101F30;
+  --prose-mark-bg: #3D2E1C;
+  --prose-selection: #1B3D57;
+  --focus-ring: #7DC4CE;
+
+  --mm-bg: #0A1828; --mm-node: #142A40; --mm-node-fill: #12283C;
+  --mm-border: #76B5D9; --mm-line: #76B5D9; --mm-text: #F9F4E8;
+  --mm-cluster-bg: #101F30; --mm-cluster-border: #1E3550;
+
+  --elevation-card: 0 16px 40px rgba(0,0,0,0.45);
+  color-scheme: dark;
+}
+
+/* ============================================================
+   Page
+   ============================================================ */
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  padding: var(--sp-lg) var(--sp-md) var(--sp-2xl);
+  background: var(--surface);
+  color: var(--on-surface);
+  font: 400 17px/1.7 var(--font-body);
+  font-feature-settings: "kern" 1, "calt" 1;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+::selection { background: var(--prose-selection); }
+
+.page { max-inline-size: 900px; margin-inline: auto; }
+.prose { max-inline-size: 68ch; }
+
+:focus-visible { outline: 2px solid var(--focus-ring); outline-offset: 2px; }
+
+/* ---- headings: serif down to h3, sans from h4 ---- */
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; }
+h1 { font-size: 40px; line-height: 1.15; margin: var(--sp-lg) 0 var(--sp-sm); }
+h2 { font-size: 26px; line-height: 1.25; margin: var(--sp-xl) 0 var(--sp-sm); }
+h3 { font-size: 21px; line-height: 1.3;  margin: var(--sp-lg) 0 var(--sp-sm); }
+h4 { font: 600 18px/1.4 var(--font-body); margin: var(--sp-md) 0 var(--sp-xs); }
+h5 { font: 600 16px/1.4 var(--font-body); margin: var(--sp-md) 0 var(--sp-xs); }
+h6 { font: 600 13px/1.3 var(--font-body); letter-spacing: 0.06em;
+     margin: var(--sp-md) 0 var(--sp-xs); color: var(--tone-muted-ink); }
+/* Hebrew display overrides from DESIGN.md */
+h1, h2, h3 { letter-spacing: 0; }
+p { margin: 0 0 var(--sp-md); }
+
+/* ---- links ---- */
+.prose a, a.demo {
+  color: var(--primary);
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.25em;
+  text-decoration-skip-ink: auto;
+  transition: color 120ms ease;
+}
+.prose a:hover, a.demo:hover { color: var(--tertiary); }
+
+/* ---- code ---- */
+code {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+  background: var(--prose-code-bg);
+  padding: 2px 6px;
+  border-radius: var(--rounded-xs);
+}
+pre {
+  direction: ltr;
+  text-align: start;
+  background: var(--prose-code-bg);
+  padding: var(--sp-md);
+  border-radius: var(--rounded-md);
+  overflow-x: auto;
+  margin: 0 0 var(--sp-md);
+}
+pre code { background: none; padding: 0; font-size: 14px; line-height: 1.65; }
+
+/* ---- mark ---- */
+mark {
+  color: var(--on-surface);
+  background: var(--prose-mark-bg);
+  padding: 1px 4px;
+  border-radius: var(--rounded-xs);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+/* ---- blockquote + hr ---- */
+blockquote {
+  margin: 0 0 var(--sp-md);
+  padding-inline-start: var(--sp-md);
+  border-inline-start: 2px solid var(--prose-rule);
+  opacity: 0.9;
+}
+blockquote .attrib { font-size: 14px; color: var(--tone-muted-ink); }
+hr { border: 0; border-top: 1px solid var(--prose-rule); margin: var(--sp-lg) 0; }
+
+/* ---- table ---- */
+.table-wrap { overflow-x: auto; margin-bottom: var(--sp-md); }
+table { border-collapse: collapse; inline-size: 100%; font-size: 16px; }
+th {
+  background: var(--surface);
+  font: 600 13px/1.3 var(--font-body);
+  letter-spacing: 0.06em;
+  color: var(--tone-muted-ink);
+  text-align: start;
+  padding: var(--ck-md);
+  border-bottom: 1px solid var(--prose-rule);
+}
+td { padding: var(--ck-md); border-bottom: 1px solid var(--prose-rule); }
+
+/* ============================================================
+   Callouts
+   ============================================================ */
+.callout {
+  background: var(--tone-bg);
+  border-inline-start: 3px solid var(--tone);
+  border-radius: var(--rounded-md);
+  padding: var(--sp-md);
+  margin: 0 0 var(--sp-sm);
+}
+.callout > .title {
+  display: flex; align-items: center; gap: var(--ck-sm);
+  font: 600 16px/1.4 var(--font-body);
+  color: var(--tone-ink);
+  margin-block-end: var(--ck-sm);
+}
+.callout > .title svg { inline-size: 18px; block-size: 18px; flex: none; color: var(--tone); }
+.callout p:last-child { margin-bottom: 0; }
+
+.t-info    { --tone: var(--tone-info);    --tone-bg: var(--tone-info-bg);    --tone-ink: var(--tone-info-ink); }
+.t-tip     { --tone: var(--tone-tip);     --tone-bg: var(--tone-tip-bg);     --tone-ink: var(--tone-tip-ink); }
+.t-success { --tone: var(--tone-success); --tone-bg: var(--tone-success-bg); --tone-ink: var(--tone-success-ink); }
+.t-warning { --tone: var(--tone-warning); --tone-bg: var(--tone-warning-bg); --tone-ink: var(--tone-warning-ink); }
+.t-danger  { --tone: var(--tone-danger);  --tone-bg: var(--tone-danger-bg);  --tone-ink: var(--tone-danger-ink); }
+.t-accent  { --tone: var(--tone-accent);  --tone-bg: var(--tone-accent-bg);  --tone-ink: var(--tone-accent-ink); }
+.t-muted   { --tone: var(--tone-muted);   --tone-bg: var(--tone-muted-bg);   --tone-ink: var(--tone-muted-ink); }
+
+/* quote: not a callout. No tone, editorial voice. */
+.q-quote {
+  font-family: var(--font-display);
+  font-size: 21px;
+  line-height: 1.4;
+  border-inline-start: 1px solid var(--prose-rule);
+  padding-inline-start: var(--sp-md);
+  margin: var(--sp-lg) 0;
+}
+.q-quote .attrib { font: 400 14px/1.6 var(--font-body); color: var(--tone-muted-ink); }
+
+/* ============================================================
+   details
+   ============================================================ */
+details.coast {
+  background: var(--surface-container);
+  border: 1px solid var(--prose-rule);
+  border-radius: var(--rounded-md);
+  margin: 0 0 var(--sp-md);
+  overflow: hidden;
+}
+details.coast > summary {
+  display: flex; align-items: center; gap: var(--ck-sm);
+  font: 600 16px/1.4 var(--font-body);
+  padding: var(--ck-md) var(--sp-md);
+  cursor: pointer;
+  list-style: none;
+}
+details.coast > summary::-webkit-details-marker { display: none; }
+details.coast > summary .chev {
+  margin-inline-start: auto;
+  inline-size: 16px; block-size: 16px;
+  color: var(--tone-muted-ink);
+  /* direction-aware: flipped for RTL, rotates on open */
+  transform: scaleX(-1);
+  transition: transform 120ms ease;
+}
+details.coast[open] > summary .chev { transform: scaleX(-1) rotate(90deg); }
+details.coast[open] > summary { border-block-end: 1px solid var(--prose-rule); }
+details.coast .body { padding: var(--sp-md); }
+details.coast .body p:last-child { margin-bottom: 0; }
+
+/* ============================================================
+   task list
+   ============================================================ */
+ul.tasks { list-style: none; margin: 0 0 var(--sp-md); padding: 0; }
+ul.tasks li {
+  display: flex; align-items: flex-start; gap: var(--ck-md);
+  padding-block: var(--ck-xs);
+}
+ul.tasks input[type="checkbox"] {
+  appearance: none; -webkit-appearance: none;
+  inline-size: 18px; block-size: 18px; flex: none;
+  margin: 4px 0 0;
+  border: 1px solid var(--prose-rule);
+  border-radius: var(--rounded-xs);
+  background: var(--surface-container);
+  display: grid; place-content: center;
+}
+ul.tasks input[type="checkbox"]:checked {
+  background: var(--tone-success);
+  border-color: var(--tone-success);
+}
+ul.tasks input[type="checkbox"]:checked::after {
+  content: "";
+  inline-size: 10px; block-size: 6px;
+  border: 2px solid #fff; border-block-start: 0; border-inline-end: 0;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+/* deliberately no line-through: struck Hebrew loses its x-height detail */
+ul.tasks input:checked + span { color: var(--tone-muted-ink); }
+
+/* ============================================================
+   chrome: toolbar, status, theme switch
+   ============================================================ */
+.toolbar {
+  position: sticky; inset-block-start: 0; z-index: 10;
+  display: flex; align-items: center; gap: var(--ck-lg);
+  padding: var(--ck-md) var(--ck-lg);
+  margin-block-end: var(--sp-lg);
+  background: var(--surface-container);
+  border-radius: 9999px;
+  box-shadow: var(--elevation-card);
+}
+.toolbar .name { font: 600 16px/1.4 var(--font-body); }
+.toolbar .spacer { margin-inline-start: auto; }
+button.pill {
+  font: 400 16px/1.4 var(--font-body);
+  padding: 12px 28px;
+  border: 0; border-radius: 9999px; cursor: pointer;
+  background: var(--primary); color: var(--on-primary);
+  transition: background-color 120ms ease, color 120ms ease;
+}
+button.pill:hover { background: var(--tertiary); color: var(--on-tertiary); }
+
+.status { display: flex; align-items: center; gap: var(--ck-sm);
+          font: 600 13px/1.3 var(--font-body); letter-spacing: 0.06em; }
+.status .dot { inline-size: 8px; block-size: 8px; border-radius: 50%; flex: none; }
+.s-saved  .dot { background: var(--status-saved); }  .s-saved  { color: var(--status-saved); }
+.s-saving .dot { background: var(--status-saving); animation: pulse 1.2s ease-in-out infinite; }
+.s-saving { color: var(--status-saving); }
+.s-dirty  .dot { background: var(--status-dirty); }  .s-dirty  { color: var(--status-dirty); }
+.s-error  .dot { background: var(--status-error); }  .s-error  { color: var(--status-error); }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: 0.3 } }
+@media (prefers-reduced-motion: reduce) { .s-saving .dot { animation: none } }
+
+.status-row { display: flex; flex-wrap: wrap; gap: var(--ck-xl); margin-bottom: var(--sp-md); }
+
+.swatches { display: flex; flex-wrap: wrap; gap: var(--ck-sm); margin-bottom: var(--sp-md); }
+.swatch { padding: var(--ck-sm) var(--ck-lg); border-radius: var(--rounded-sm);
+          font: 600 13px/1.3 var(--font-body); }
+
+/* mermaid mock stays LTR, like the real rendered SVG */
+.mermaid-wrap { direction: ltr; background: var(--mm-bg); border-radius: var(--rounded-md);
+                padding: var(--sp-md); overflow-x: auto; margin-bottom: var(--sp-md); }
+
+.note-line { font-size: 14px; color: var(--tone-muted-ink); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="toolbar">
+    <span class="name">Coast Markdown 0.1.0</span>
+    <span class="status s-saved"><span class="dot"></span>כל השינויים נשמרו</span>
+    <span class="spacer"></span>
+    <button class="pill" id="themeBtn" type="button">מצב כהה</button>
+  </div>
+
+  <div class="prose">
+
+    <h1>משטח בדיקה למפרט</h1>
+    <p>
+      כל אלמנט כאן מרונדר לפי <code>docs/DESIGN.markdown.md</code>, בעברית, ב‑RTL.
+      החלף בין המצבים ובדוק שכלום לא נשבר. גרסת בסיס: Coast 0.1.2.
+      <a class="demo" href="#callouts">קפיצה לקונטיינרים</a>.
+    </p>
+
+    <h2>סקאלת כותרות</h2>
+    <h1>כותרת ברמה 1</h1>
+    <h2>כותרת ברמה 2</h2>
+    <h3>כותרת ברמה 3</h3>
+    <h4>כותרת ברמה 4, כאן עוברים לסאנס</h4>
+    <h5>כותרת ברמה 5</h5>
+    <h6>כותרת ברמה 6</h6>
+    <p class="note-line">
+      שלוש הראשונות ב‑Frank Ruhl Libre, מרמה 4 ומטה Heebo. אין
+      <code>text-transform: uppercase</code> על רמה 6: לעברית אין רישיות.
+    </p>
+
+    <h2>טקסט, קישורים, הדגשה</h2>
+    <p>
+      פסקה רגילה עם <a class="demo" href="#">קישור בתוך משפט</a> שצריך לשמור מרווח
+      מספיק מתחת לקו כדי שהיורדות ק, ן, ץ, ך לא יתנגשו בו. יש כאן גם
+      <mark>טקסט מודגש שנמשך על פני כמה מילים כדי לבדוק גלישה בין שורות</mark>
+      ומספרים בתוך זרימה עברית: <bdi>1,200 ₪</bdi>, <bdi>052-123-4567</bdi>,
+      ומזהה קוד <code>brexpiprazole</code> שנשאר LTR.
+    </p>
+
+    <h2>קוד</h2>
+<pre><code>const tones = ['info', 'tip', 'success', 'warning',
+               'danger', 'accent', 'muted'];
+// כאן הערה בעברית בתוך בלוק קוד
+</code></pre>
+    <p class="note-line">הבלוק כולו LTR, גם בדף RTL. גלילה אופקית קורית בתוכו, לא בדף.</p>
+
+    <h2>ציטוט וקו מפריד</h2>
+    <blockquote>
+      <p>אני חושב שיש שוק עולמי לאולי חמישה מחשבים.</p>
+      <p class="attrib">מיוחס לתומאס ווטסון</p>
+    </blockquote>
+    <hr>
+
+    <h2 id="callouts">קונטיינרים</h2>
+    <p class="note-line">שלושה־עשר קונטיינרים על שבעה גוונים. <code>quote</code> יושב בנפרד ואין לו גוון.</p>
+
+    <div class="callout t-info">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/></svg>הערה</div>
+      <p>תזכורת חשובה.</p>
+    </div>
+
+    <div class="callout t-info">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>מידע</div>
+      <p>בלוק מידע כללי, לשימוש בהסברים טכניים או הערות מערכת.</p>
+    </div>
+
+    <div class="callout t-info">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4v16M9 7h10M9 12h10M9 17h6"/></svg>תקציר</div>
+      <p>סיכום קצר של רעיון או פרק במסמך.</p>
+    </div>
+
+    <div class="callout t-tip">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9V15h7v-1.1A6 6 0 0 0 12 3z"/></svg>טיפ</div>
+      <p>טיפ חכם.</p>
+    </div>
+
+    <div class="callout t-tip">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/><path d="M13 7h8M7 13v8"/></svg>דוגמה</div>
+      <p>דוגמה לשימוש בפיצ'ר חדש.</p>
+    </div>
+
+    <div class="callout t-success">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/></svg>הצלחה</div>
+      <p>הפעולה הושלמה בהצלחה.</p>
+    </div>
+
+    <div class="callout t-warning">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.5"/></svg>אזהרה</div>
+      <p>זהו בלוק אזהרה.</p>
+    </div>
+
+    <div class="callout t-warning">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 3h4M11 3v6l-5 9a2 2 0 0 0 1.8 3h8.4a2 2 0 0 0 1.8-3l-5-9V3"/></svg>ניסיוני</div>
+      <p>פיצ'ר ניסיוני, לבדיקה בלבד.</p>
+    </div>
+
+    <div class="callout t-danger">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8.5 3h7L21 8.5v7L15.5 21h-7L3 15.5v-7z"/><path d="M12 8v5M12 16v.5"/></svg>סכנה</div>
+      <p>פעולה בלתי הפיכה. אין דרך חזרה אחרי אישור.</p>
+    </div>
+
+    <div class="callout t-accent">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 16v.5"/></svg>חשוב</div>
+      <p>דגש על נקודה קריטית.</p>
+    </div>
+
+    <div class="callout t-accent">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.2 2.4c-.6.2-.7.7-.7 1.1v.5M12 16.5v.5"/></svg>שאלה</div>
+      <p>שאלה פתוחה, אפשר להוסיף תשובות מתחת.</p>
+    </div>
+
+    <div class="callout t-muted">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="12" height="16" rx="2"/><path d="M7 9h4M7 13h4"/><path d="M17 5l4 4-6 6-4 1 1-4z"/></svg>לביצוע</div>
+      <p>משימה לביצוע בהמשך.</p>
+    </div>
+
+    <div class="callout t-muted">
+      <div class="title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M6 6l12 12"/></svg>מיושן</div>
+      <p>בלוק שהוכרז כמיושן, לא לשימוש יותר.</p>
+    </div>
+
+    <div class="q-quote">
+      <p>הדמיון חשוב מהידע.</p>
+      <p class="attrib">אלברט איינשטיין</p>
+    </div>
+    <p class="note-line">
+      <code>quote</code> בסריף, בלי גוון, בלי אייקון, קו שיער בלבד. זה המקום היחיד
+      במסמך שבו הסריף של Coast עובד.
+    </p>
+
+    <h2>קונטיינר מתקפל</h2>
+    <details class="coast">
+      <summary>
+        לחצו כאן לתוכן מוסתר
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+      </summary>
+      <div class="body">
+        <p>תוכן שמוסתר עד ללחיצה. אלמנט <code>&lt;details&gt;</code> טבעי, אז הוא שורד הדפסה, מקלדת וקוראי מסך.</p>
+      </div>
+    </details>
+    <p class="note-line">הצ'ברון הפוך ל‑RTL ומסתובב 90 מעלות בפתיחה.</p>
+
+    <h2>רשימת משימות</h2>
+    <ul class="tasks">
+      <li><input type="checkbox" id="t1"><span>משימה ראשונה</span></li>
+      <li><input type="checkbox" id="t2"><span>משימה שנייה</span></li>
+      <li><input type="checkbox" id="t3" checked><span>משימה שהושלמה</span></li>
+    </ul>
+    <p class="note-line">
+      התיבה בצד ההתחלה, כלומר ימין. אין קו חוצה על מה שהושלם: קו על עברית חוצה
+      בדיוק את הפס שנושא את כל ההבחנה בין האותיות.
+    </p>
+
+    <h2>טבלה</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>סוג</th><th>גוון</th><th>מחיר</th></tr></thead>
+        <tbody>
+          <tr><td><code>note</code></td><td>info</td><td><bdi>1,200 ₪</bdi></td></tr>
+          <tr><td><code>tip</code></td><td>tip</td><td><bdi>860 ₪</bdi></td></tr>
+          <tr><td><code>danger</code></td><td>danger</td><td><bdi>2,400 ₪</bdi></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>מרמייד</h2>
+    <div class="mermaid-wrap">
+      <svg viewBox="0 0 520 130" width="520" height="130" role="img" aria-label="תרשים זרימה לדוגמה בצבעי הערכה">
+        <g fill="var(--mm-node-fill)" stroke="var(--mm-border)" stroke-width="1.5">
+          <rect x="360" y="20" width="140" height="42" rx="6"/>
+          <rect x="190" y="20" width="130" height="42" rx="6"/>
+          <rect x="20"  y="20" width="130" height="42" rx="6"/>
+        </g>
+        <g fill="var(--mm-text)" font-family="Heebo, sans-serif" font-size="14" text-anchor="middle">
+          <text x="430" y="46" direction="rtl">שלב ראשון</text>
+          <text x="255" y="46" direction="rtl">עיבוד</text>
+          <text x="85"  y="46" direction="rtl">תוצאה</text>
+        </g>
+        <g stroke="var(--mm-line)" stroke-width="1.5" fill="none">
+          <path d="M360 41 H328" marker-end="url(#a)"/>
+          <path d="M190 41 H158" marker-end="url(#a)"/>
+        </g>
+        <defs>
+          <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M0 0 L10 5 L0 10 z" fill="var(--mm-line)"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+    <p class="note-line">
+      העוטף LTR כמו ה‑SVG האמיתי של מרמייד, והתוויות העבריות מקבלות כיוון מפורש.
+      הזרימה מימין לשמאל, כלומר <code>flowchart RL</code>.
+    </p>
+
+    <h2>מצבי עורך</h2>
+    <div class="status-row">
+      <span class="status s-saved"><span class="dot"></span>כל השינויים נשמרו</span>
+      <span class="status s-saving"><span class="dot"></span>שומר…</span>
+      <span class="status s-dirty"><span class="dot"></span>יש שינויים שלא נשמרו</span>
+      <span class="status s-error"><span class="dot"></span>השמירה נכשלה</span>
+    </div>
+    <p class="note-line">כל מצב נושא טקסט. הנקודה היא חיזוק, לא הסימן עצמו.</p>
+
+    <h2>גוונים</h2>
+    <div class="swatches">
+      <span class="swatch t-info"    style="background:var(--tone-info-bg);    color:var(--tone-info-ink)">info</span>
+      <span class="swatch t-tip"     style="background:var(--tone-tip-bg);     color:var(--tone-tip-ink)">tip</span>
+      <span class="swatch t-success" style="background:var(--tone-success-bg); color:var(--tone-success-ink)">success</span>
+      <span class="swatch t-warning" style="background:var(--tone-warning-bg); color:var(--tone-warning-ink)">warning</span>
+      <span class="swatch t-danger"  style="background:var(--tone-danger-bg);  color:var(--tone-danger-ink)">danger</span>
+      <span class="swatch t-accent"  style="background:var(--tone-accent-bg);  color:var(--tone-accent-ink)">accent</span>
+      <span class="swatch t-muted"   style="background:var(--tone-muted-bg);   color:var(--tone-muted-ink)">muted</span>
+    </div>
+    <p class="note-line">כל שבעת הזוגות נמדדו ב‑WCAG AA ומעלה, בשני המצבים.</p>
+
+  </div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var btn = document.getElementById('themeBtn');
+  var mql = window.matchMedia('(prefers-color-scheme: dark)');
+
+  function current() {
+    return root.getAttribute('data-theme') || (mql.matches ? 'dark' : 'light');
+  }
+  function paint() {
+    var dark = current() === 'dark';
+    root.classList.toggle('dark-vars', dark);
+    btn.textContent = dark ? 'מצב בהיר' : 'מצב כהה';
+  }
+  btn.addEventListener('click', function () {
+    root.setAttribute('data-theme', current() === 'dark' ? 'light' : 'dark');
+    paint();
+  });
+  mql.addEventListener('change', function () {
+    if (!root.hasAttribute('data-theme')) paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
