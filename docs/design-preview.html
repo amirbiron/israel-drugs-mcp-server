@@ -294,8 +294,11 @@ ul.tasks input[type="checkbox"]:checked::after {
   border: 2px solid #fff; border-block-start: 0; border-inline-end: 0;
   transform: rotate(-45deg) translate(1px, -1px);
 }
+/* The label is what gives the checkbox its accessible name, so it is a real
+   <label for>, not a bare span. That also makes the text a click target. */
+ul.tasks label { cursor: pointer; }
 /* deliberately no line-through: struck Hebrew loses its x-height detail */
-ul.tasks input:checked + span { color: var(--tone-muted-ink); }
+ul.tasks input:checked + label { color: var(--tone-muted-ink); }
 
 /* ============================================================
    chrome: toolbar, status, theme switch
@@ -332,6 +335,23 @@ button.pill:hover { background: var(--tertiary); color: var(--on-tertiary); }
 @media (prefers-reduced-motion: reduce) { .s-saving .dot { animation: none } }
 
 .status-row { display: flex; flex-wrap: wrap; gap: var(--ck-xl); margin-bottom: var(--sp-md); }
+
+/* The spec gives the error state a retry affordance, so the preview carries a
+   real button: focusable, keyboard-operable, and picking up the page's
+   :focus-visible ring rather than inventing its own. */
+.status .retry {
+  font: 600 12px/1.2 var(--font-body);
+  padding: 4px 12px;
+  margin-inline-start: var(--ck-sm);
+  border: 1px solid currentColor;
+  border-radius: 9999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.s-error .retry:hover { background: var(--status-error); color: var(--surface-container); }
+.s-saved .retry:hover { background: var(--status-saved); color: var(--surface-container); }
 
 .swatches { display: flex; flex-wrap: wrap; gap: var(--ck-sm); margin-bottom: var(--sp-md); }
 .swatch { padding: var(--ck-sm) var(--ck-lg); border-radius: var(--rounded-sm);
@@ -489,9 +509,9 @@ button.pill:hover { background: var(--tertiary); color: var(--on-tertiary); }
 
     <h2>רשימת משימות</h2>
     <ul class="tasks">
-      <li><input type="checkbox" id="t1"><span>משימה ראשונה</span></li>
-      <li><input type="checkbox" id="t2"><span>משימה שנייה</span></li>
-      <li><input type="checkbox" id="t3" checked><span>משימה שהושלמה</span></li>
+      <li><input type="checkbox" id="t1"><label for="t1">משימה ראשונה</label></li>
+      <li><input type="checkbox" id="t2"><label for="t2">משימה שנייה</label></li>
+      <li><input type="checkbox" id="t3" checked><label for="t3">משימה שהושלמה</label></li>
     </ul>
     <p class="note-line">
       התיבה בצד ההתחלה, כלומר ימין. אין קו חוצה על מה שהושלם: קו על עברית חוצה
@@ -544,9 +564,15 @@ button.pill:hover { background: var(--tertiary); color: var(--on-tertiary); }
       <span class="status s-saved"><span class="dot"></span>כל השינויים נשמרו</span>
       <span class="status s-saving"><span class="dot"></span>שומר…</span>
       <span class="status s-dirty"><span class="dot"></span>יש שינויים שלא נשמרו</span>
-      <span class="status s-error"><span class="dot"></span>השמירה נכשלה</span>
+      <span class="status s-error" id="errStatus" role="status" aria-live="polite">
+        <span class="dot"></span><span id="errLabel">השמירה נכשלה</span>
+        <button class="retry" id="retryBtn" type="button">נסה שוב</button>
+      </span>
     </div>
-    <p class="note-line">כל מצב נושא טקסט. הנקודה היא חיזוק, לא הסימן עצמו.</p>
+    <p class="note-line">
+      כל מצב נושא טקסט. הנקודה היא חיזוק, לא הסימן עצמו. מצב השגיאה נושא גם
+      פעולת התאוששות, כפי שהמפרט דורש. לחיצה עליו מדגימה את המעבר לשמירה ולשמור.
+    </p>
 
     <h2>גוונים</h2>
     <div class="swatches">
@@ -585,6 +611,36 @@ button.pill:hover { background: var(--tertiary); color: var(--on-tertiary); }
     if (!root.hasAttribute('data-theme')) paint();
   });
   paint();
+})();
+
+/* Walks the error state through recovery, so the preview shows the transition
+   rather than four disconnected swatches. The container is aria-live, so each
+   step is announced. */
+(function () {
+  var status = document.getElementById('errStatus');
+  var label = document.getElementById('errLabel');
+  var btn = document.getElementById('retryBtn');
+  var timer;
+
+  function set(cls, text, action) {
+    status.className = 'status ' + cls;
+    label.textContent = text;
+    btn.hidden = !action;
+    if (action) btn.textContent = action;
+  }
+
+  btn.addEventListener('click', function () {
+    clearTimeout(timer);
+    if (status.classList.contains('s-saved')) {
+      set('s-error', 'השמירה נכשלה', 'נסה שוב');
+      return;
+    }
+    set('s-saving', 'שומר…', null);
+    timer = setTimeout(function () {
+      set('s-saved', 'כל השינויים נשמרו', 'הצג שוב');
+      btn.focus();
+    }, 1200);
+  });
 })();
 </script>
 </body>
